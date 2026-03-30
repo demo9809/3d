@@ -228,7 +228,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;
       <model-viewer
         id="mv-momo"
         class="hidden-mv"
-        src="momo-scaled.glb"
+        src="momo-optimized.glb"
         alt="Steamed Momo Dumplings"
         ar
         ar-modes="scene-viewer webxr quick-look"
@@ -278,26 +278,63 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;
     </div>
   </div>
 
-  <!-- ═══ DISH 2 — TENDERLOIN (no GLB yet) ═══ -->
+  <!-- ═══ DISH 2 — ALFAHAM CHICKEN ═══ -->
   <div class="dish-card" data-cat="mains">
     <div class="dish-thumb">
-      <div class="dish-thumb-emoji">🥩</div>
-      <div class="badge badge-gold">Chef's Pick</div>
+      <img src="alfaham.webp" alt="Alfaham Chicken">
+      <div class="badge badge-gold">New</div>
+
+      <!-- Invisible model-viewer — only used to fire AR -->
+      <model-viewer
+        id="mv-alfaham"
+        class="hidden-mv"
+        src="alfaham.glb"
+        alt="Alfaham Chicken"
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        ar-scale="fixed"
+        shadow-intensity="1.5"
+        exposure="1.1"
+      ></model-viewer>
+
       <div class="ar-trigger-wrap">
-        <button class="btn-place-ar no-ar">3D Model Coming Soon</button>
+        <button class="btn-place-ar" id="btn-alfaham" onclick="launchAR('alfaham')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="7" cy="7" r="2.5" fill="currentColor"/>
+          </svg>
+          Place on Table
+        </button>
       </div>
     </div>
+
     <div class="dish-body">
-      <div class="dish-top"><div class="dish-name">Grilled Tenderloin</div><div class="dish-price">₹1,250</div></div>
-      <div class="dish-desc">200g prime beef tenderloin, chimichurri butter, roasted garlic mash & seasonal vegetables.</div>
-      <div class="dish-meta"><div class="cal-tag">🔥 <span>620 kcal</span></div><div class="health-tags"><span class="health-tag ht-gold">High Protein</span><span class="health-tag ht-green">Iron Rich</span></div></div>
-      <div class="nutr-row">
-        <div class="nutr-item"><div class="nutr-val">48g</div><div class="nutr-key">Protein</div></div>
-        <div class="nutr-item"><div class="nutr-val">22g</div><div class="nutr-key">Carbs</div></div>
-        <div class="nutr-item"><div class="nutr-val">32g</div><div class="nutr-key">Fat</div></div>
-        <div class="nutr-item"><div class="nutr-val">4g</div><div class="nutr-key">Fiber</div></div>
+      <div class="dish-top">
+        <div class="dish-name">Arabian Alfaham Chicken</div>
+        <div class="dish-price">₹450</div>
       </div>
-      <div class="dish-actions"><button class="btn-add" onclick="addToCart('Grilled Tenderloin',1250)">+ Add to Order</button></div>
+      <div class="dish-desc">Juicy grilled chicken marinated in authentic Arabian spices, served with garlic paste and kuboos.</div>
+      <div class="dish-meta">
+        <div class="cal-tag">🔥 <span>520 kcal</span></div>
+        <div class="health-tags">
+          <span class="health-tag ht-gold">High Protein</span>
+          <span class="health-tag ht-green">Low Carb</span>
+        </div>
+      </div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">45g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">12g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">28g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">3g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="ing-strip">
+        <div class="ing-chip">🍗 Chicken <span>· Protein</span></div>
+        <div class="ing-chip">🌶 Arabian Spices <span>· Flavor</span></div>
+        <div class="ing-chip">🧄 Garlic Paste <span>· Immunity</span></div>
+      </div>
+      <div class="dish-actions">
+        <button class="btn-add" onclick="addToCart('Arabian Alfaham Chicken',450)">+ Add to Order</button>
+      </div>
     </div>
   </div>
 
@@ -385,7 +422,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;
 let cartItems = 0;
 
 // Map of dish ids → their model-viewer elements
-const mvMap = { momo: null };
+const mvMap = { momo: null, alfaham: null };
 
 // Initialise once model-viewer script has defined the custom element
 function getMV(id) {
@@ -393,41 +430,15 @@ function getMV(id) {
   return mvMap[id];
 }
 
-async function launchAR(id) {
-  const btn = document.getElementById('btn-' + id);
-  const mv  = getMV(id);
-
+function launchAR(id) {
+  const mv = getMV(id);
   if (!mv) { showToast('AR model not found'); return; }
-
-  // Show loading state on button
-  btn.classList.add('loading');
-  btn.textContent = '';
-
-  // Wait for model to be ready (loaded flag or wait for load event)
-  await waitForLoad(mv);
-
-  btn.classList.remove('loading');
-  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="7" r="2.5" fill="currentColor"/></svg> Place on Table`;
-
-  if (!mv.canActivateAR) {
-    showToast('AR not supported on this browser. Try Android Chrome or iPhone Safari.');
-    return;
-  }
 
   try {
     mv.activateAR();
-    showToast('📍 Slowly move your phone over your table');
   } catch(e) {
-    showToast('Could not launch AR — try again');
+    showToast('AR not supported. Try Android Chrome or iPhone Safari.');
   }
-}
-
-function waitForLoad(mv) {
-  return new Promise((resolve) => {
-    if (mv.loaded) { resolve(); return; }
-    mv.addEventListener('load', () => resolve(), { once: true });
-    mv.addEventListener('error', () => resolve(), { once: true }); // resolve anyway
-  });
 }
 
 // Listen to AR events globally
