@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>The Golden Oak – 4D Smart Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;
+  --black:#0A0A08;--surface:#111109;--surface2:#1A1A14;--surface3:#222218;
+  --border:rgba(201,168,76,0.15);--border-active:rgba(201,168,76,0.5);
+  --text:#F0EAD6;--text-muted:rgba(240,234,214,0.45);--text-dim:rgba(240,234,214,0.25);
+  --radius:14px;--red:#CF6679;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:rgba(10,10,8,.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:.08em;color:var(--gold)}
+.logo-sub{font-size:9px;letter-spacing:.25em;color:var(--text-muted);text-transform:uppercase;margin-top:2px}
+.cart-btn{position:relative;background:var(--gold);color:var(--black);border:none;border-radius:8px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:.05em;transition:background .2s}
+.cart-btn:hover{background:var(--gold-light)}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:none;align-items:center;justify-content:center;font-weight:500}
+.cart-count.show{display:flex}
+
+/* HERO */
+.hero-band{background:linear-gradient(135deg,var(--surface) 0%,#0F0F0A 50%,var(--surface2) 100%);border-bottom:1px solid var(--border);padding:24px 20px 20px;position:relative;overflow:hidden}
+.hero-band::after{content:'';position:absolute;right:-40px;top:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent 70%);pointer-events:none}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-active);border-radius:20px;padding:4px 12px;font-size:9px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+.pulse-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;line-height:1.1;margin-bottom:8px}
+.hero-title em{font-style:italic;color:var(--gold)}
+.hero-desc{font-size:12px;color:var(--text-muted);line-height:1.6}
+
+/* CATEGORIES */
+.cats-scroll{padding:14px 20px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cats-scroll::-webkit-scrollbar{display:none}
+.cat-pill{flex-shrink:0;border:1px solid var(--border);border-radius:20px;padding:7px 16px;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--text-muted);background:transparent;font-family:'DM Sans',sans-serif}
+.cat-pill.active{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:500}
+.cat-pill:hover:not(.active){border-color:var(--border-active);color:var(--text)}
+
+.section-label{padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400}
+.section-count{font-size:11px;color:var(--text-muted)}
+
+/* MENU GRID */
+.menu-grid{padding:0 20px 110px;display:flex;flex-direction:column;gap:14px}
+
+/* DISH CARD */
+.dish-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;animation:card-in .4s ease both}
+.dish-card:nth-child(1){animation-delay:.05s}.dish-card:nth-child(2){animation-delay:.1s}
+.dish-card:nth-child(3){animation-delay:.15s}.dish-card:nth-child(4){animation-delay:.2s}
+.dish-card:nth-child(5){animation-delay:.25s}
+@keyframes card-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.dish-card:hover{border-color:var(--border-active)}
+
+/* DISH THUMBNAIL */
+.dish-thumb{
+  position:relative;height:200px;
+  background:var(--surface3);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.dish-thumb-emoji{font-size:80px;line-height:1;filter:drop-shadow(0 10px 28px rgba(0,0,0,.6));transition:transform .3s}
+.dish-card:hover .dish-thumb-emoji{transform:scale(1.06)}
+
+/* If user has a real product photo */
+.dish-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.dish-card:hover .dish-thumb img{transform:scale(1.04)}
+
+.badge{position:absolute;top:10px;left:10px;z-index:2;border-radius:4px;padding:3px 8px;font-size:8px;letter-spacing:.15em;font-weight:500;text-transform:uppercase}
+.badge-green{background:rgba(76,175,114,.9);color:#fff}
+.badge-gold{background:var(--gold);color:var(--black)}
+
+/* ── THE HERO BUTTON: Place on Table ── */
+/* Hidden model-viewer sits offscreen, renders AR only */
+.ar-trigger-wrap{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;justify-content:center;
+  padding-bottom:14px;
+  background:linear-gradient(to top, rgba(10,10,8,.85) 0%, transparent 100%);
+  padding-top:28px;
+  z-index:5;
+}
+
+/* The model-viewer is invisible — purely used to launch AR */
+.hidden-mv{
+  position:absolute;
+  width:1px;height:1px;
+  opacity:0;pointer-events:none;
+  bottom:0;left:0;
+  --poster-color:transparent;
+}
+.hidden-mv::part(default-ar-button){display:none}
+.hidden-mv::part(default-progress-bar){background:var(--gold);height:2px}
+
+/* The visible button */
+.btn-place-ar{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold);color:var(--black);
+  border:none;border-radius:28px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 22px;cursor:pointer;
+  transition:background .2s, transform .15s;
+  box-shadow:0 4px 20px rgba(201,168,76,.35);
+  position:relative;z-index:6;
+}
+.btn-place-ar:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-place-ar:active{transform:scale(.97)}
+.btn-place-ar svg{flex-shrink:0}
+
+/* loading state on button */
+.btn-place-ar.loading{
+  background:rgba(201,168,76,.4);
+  color:rgba(0,0,0,.5);
+  pointer-events:none;
+}
+.btn-place-ar.loading::after{
+  content:'';
+  display:inline-block;width:12px;height:12px;
+  border:2px solid rgba(0,0,0,.3);
+  border-top-color:var(--black);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin-left:6px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* no-ar state */
+.btn-place-ar.no-ar{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  box-shadow:none;
+  cursor:default;
+  font-size:10px;
+}
+
+/* DISH BODY */
+.dish-body{padding:14px}
+.dish-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.dish-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;line-height:1.2}
+.dish-price{font-size:16px;font-weight:500;color:var(--gold);white-space:nowrap;flex-shrink:0}
+.dish-desc{font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:10px}
+.dish-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-tag{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted)}
+.health-tags{display:flex;gap:4px;flex-wrap:wrap}
+.health-tag{padding:2px 8px;border-radius:10px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.ht-green{background:rgba(76,175,114,.12);color:#4CAF72;border:1px solid rgba(76,175,114,.2)}
+.ht-gold{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid var(--border)}
+.ht-blue{background:rgba(100,149,237,.12);color:#6495ED;border:1px solid rgba(100,149,237,.2)}
+.nutr-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.nutr-item{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:7px 6px;text-align:center}
+.nutr-val{font-size:13px;font-weight:500;color:var(--gold)}
+.nutr-key{font-size:8px;color:var(--text-muted);margin-top:1px;text-transform:uppercase;letter-spacing:.05em}
+.ing-strip{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.ing-chip{display:flex;align-items:center;gap:4px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--text-muted)}
+.ing-chip span{font-size:9px;color:var(--text-dim)}
+.dish-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.btn-add{flex:1;background:var(--gold);color:var(--black);border:none;border-radius:8px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:.05em;transition:background .2s}
+.btn-add:hover{background:var(--gold-light)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,8,.97);border-top:1px solid var(--border);backdrop-filter:blur(20px);display:flex;padding:12px 0 env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--text-dim);font-size:9px;letter-spacing:.05em;text-transform:uppercase;transition:color .2s}
+.nav-item.active{color:var(--gold)}
+.nav-icon{font-size:18px}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--gold);z-index:600;opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div>
+    <div class="logo">The Golden Oak</div>
+    <div class="logo-sub">4D Smart Menu · Table 7</div>
+  </div>
+  <button class="cart-btn" onclick="showToast('Your order summary')">
+    Order <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<!-- HERO -->
+<div class="hero-band">
+  <div class="hero-tag"><div class="pulse-dot"></div>AR Experience Active</div>
+  <h1 class="hero-title">See It <em>On Your Table</em><br>Before You Order</h1>
+  <p class="hero-desc">Tap <strong style="color:var(--gold)">Place on Table</strong> — see any dish in real size on your table using your camera.</p>
+</div>
+
+<!-- CATEGORIES -->
+<div class="cats-scroll">
+  <button class="cat-pill active" onclick="filterCat(this,'all')">✦ All</button>
+  <button class="cat-pill" onclick="filterCat(this,'starters')">🥗 Starters</button>
+  <button class="cat-pill" onclick="filterCat(this,'mains')">🍽 Mains</button>
+  <button class="cat-pill" onclick="filterCat(this,'burgers')">🍔 Burgers</button>
+  <button class="cat-pill" onclick="filterCat(this,'salads')">🥙 Salads</button>
+  <button class="cat-pill" onclick="filterCat(this,'desserts')">🍮 Desserts</button>
+</div>
+
+<div class="section-label">
+  <span class="section-title">Today's Menu</span>
+  <span class="section-count" id="dishCount">5 dishes</span>
+</div>
+
+<!-- MENU GRID -->
+<div class="menu-grid" id="menuGrid">
+
+  <!-- ═══ DISH 1 — MOMO (real GLB) ═══ -->
+  <div class="dish-card" data-cat="starters">
+    <div class="dish-thumb">
+      <div class="dish-thumb-emoji">🥟</div>
+      <div class="badge badge-green">Bestseller</div>
+
+      <!-- Invisible model-viewer — only used to fire AR -->
+      <model-viewer
+        id="mv-momo"
+        class="hidden-mv"
+        src="momo-optimized.glb"
+        alt="Steamed Momo Dumplings"
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        ar-scale="fixed"
+        shadow-intensity="1.5"
+        exposure="1.1"
+      ></model-viewer>
+
+      <div class="ar-trigger-wrap">
+        <button class="btn-place-ar" id="btn-momo" onclick="launchAR('momo')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="7" cy="7" r="2.5" fill="currentColor"/>
+          </svg>
+          Place on Table
+        </button>
+      </div>
+    </div>
+
+    <div class="dish-body">
+      <div class="dish-top">
+        <div class="dish-name">Steamed Momo Dumplings</div>
+        <div class="dish-price">₹320</div>
+      </div>
+      <div class="dish-desc">Hand-folded wheat dumplings with spiced minced filling, served with fiery tomato chutney & sesame dip.</div>
+      <div class="dish-meta">
+        <div class="cal-tag">🔥 <span>280 kcal</span></div>
+        <div class="health-tags">
+          <span class="health-tag ht-gold">High Protein</span>
+          <span class="health-tag ht-green">Anti-Inflammatory</span>
+        </div>
+      </div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">18g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">32g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">8g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">3g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="ing-strip">
+        <div class="ing-chip">🌾 Wheat Dough <span>· Energy</span></div>
+        <div class="ing-chip">🧄 Ginger & Garlic <span>· Immunity</span></div>
+        <div class="ing-chip">🍅 Tomato Chutney <span>· Antioxidants</span></div>
+      </div>
+      <div class="dish-actions">
+        <button class="btn-add" onclick="addToCart('Steamed Momo Dumplings',320)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DISH 2 — ALFAHAM CHICKEN ═══ -->
+  <div class="dish-card" data-cat="mains">
+    <div class="dish-thumb">
+      <img src="alfaham.webp" alt="Alfaham Chicken">
+      <div class="badge badge-gold">New</div>
+
+      <!-- Invisible model-viewer — only used to fire AR -->
+      <model-viewer
+        id="mv-alfaham"
+        class="hidden-mv"
+        src="alfaham.glb"
+        alt="Alfaham Chicken"
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        ar-scale="fixed"
+        shadow-intensity="1.5"
+        exposure="1.1"
+      ></model-viewer>
+
+      <div class="ar-trigger-wrap">
+        <button class="btn-place-ar" id="btn-alfaham" onclick="launchAR('alfaham')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="7" cy="7" r="2.5" fill="currentColor"/>
+          </svg>
+          Place on Table
+        </button>
+      </div>
+    </div>
+
+    <div class="dish-body">
+      <div class="dish-top">
+        <div class="dish-name">Arabian Alfaham Chicken</div>
+        <div class="dish-price">₹450</div>
+      </div>
+      <div class="dish-desc">Juicy grilled chicken marinated in authentic Arabian spices, served with garlic paste and kuboos.</div>
+      <div class="dish-meta">
+        <div class="cal-tag">🔥 <span>520 kcal</span></div>
+        <div class="health-tags">
+          <span class="health-tag ht-gold">High Protein</span>
+          <span class="health-tag ht-green">Low Carb</span>
+        </div>
+      </div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">45g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">12g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">28g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">3g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="ing-strip">
+        <div class="ing-chip">🍗 Chicken <span>· Protein</span></div>
+        <div class="ing-chip">🌶 Arabian Spices <span>· Flavor</span></div>
+        <div class="ing-chip">🧄 Garlic Paste <span>· Immunity</span></div>
+      </div>
+      <div class="dish-actions">
+        <button class="btn-add" onclick="addToCart('Arabian Alfaham Chicken',450)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DISH 3 — BURGER ═══ -->
+  <div class="dish-card" data-cat="burgers">
+    <div class="dish-thumb">
+      <div class="dish-thumb-emoji">🍔</div>
+      <div class="ar-trigger-wrap">
+        <button class="btn-place-ar no-ar">3D Model Coming Soon</button>
+      </div>
+    </div>
+    <div class="dish-body">
+      <div class="dish-top"><div class="dish-name">Truffle Smash Burger</div><div class="dish-price">₹780</div></div>
+      <div class="dish-desc">Double smashed patty, aged cheddar, truffle aioli, caramelised onions on a brioche bun.</div>
+      <div class="dish-meta"><div class="cal-tag">🔥 <span>890 kcal</span></div><div class="health-tags"><span class="health-tag ht-gold">High Protein</span><span class="health-tag ht-blue">Calcium</span></div></div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">42g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">58g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">44g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">3g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="dish-actions"><button class="btn-add" onclick="addToCart('Truffle Smash Burger',780)">+ Add to Order</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ DISH 4 — SALAD ═══ -->
+  <div class="dish-card" data-cat="salads">
+    <div class="dish-thumb">
+      <div class="dish-thumb-emoji">🥙</div>
+      <div class="badge badge-green">Popular</div>
+      <div class="ar-trigger-wrap">
+        <button class="btn-place-ar no-ar">3D Model Coming Soon</button>
+      </div>
+    </div>
+    <div class="dish-body">
+      <div class="dish-top"><div class="dish-name">Greek Mezze Bowl</div><div class="dish-price">₹520</div></div>
+      <div class="dish-desc">Grilled chicken, kalamata olives, feta, cucumber, cherry tomatoes, hummus & warm pita.</div>
+      <div class="dish-meta"><div class="cal-tag">🔥 <span>480 kcal</span></div><div class="health-tags"><span class="health-tag ht-green">Low Carb</span><span class="health-tag ht-blue">Probiotic</span><span class="health-tag ht-gold">High Protein</span></div></div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">36g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">28g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">18g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">8g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="dish-actions"><button class="btn-add" onclick="addToCart('Greek Mezze Bowl',520)">+ Add to Order</button></div>
+    </div>
+  </div>
+
+  <!-- ═══ DISH 5 — DESSERT ═══ -->
+  <div class="dish-card" data-cat="desserts">
+    <div class="dish-thumb">
+      <div class="dish-thumb-emoji">🍮</div>
+      <div class="badge badge-gold">New</div>
+      <div class="ar-trigger-wrap">
+        <button class="btn-place-ar no-ar">3D Model Coming Soon</button>
+      </div>
+    </div>
+    <div class="dish-body">
+      <div class="dish-top"><div class="dish-name">Crème Brûlée</div><div class="dish-price">₹380</div></div>
+      <div class="dish-desc">Classic French vanilla custard with a torched caramelised sugar crust & fresh berries.</div>
+      <div class="dish-meta"><div class="cal-tag">🔥 <span>380 kcal</span></div><div class="health-tags"><span class="health-tag ht-gold">Indulgent</span><span class="health-tag ht-blue">Calcium</span></div></div>
+      <div class="nutr-row">
+        <div class="nutr-item"><div class="nutr-val">7g</div><div class="nutr-key">Protein</div></div>
+        <div class="nutr-item"><div class="nutr-val">42g</div><div class="nutr-key">Carbs</div></div>
+        <div class="nutr-item"><div class="nutr-val">22g</div><div class="nutr-key">Fat</div></div>
+        <div class="nutr-item"><div class="nutr-val">1g</div><div class="nutr-key">Fiber</div></div>
+      </div>
+      <div class="dish-actions"><button class="btn-add" onclick="addToCart('Crème Brûlée',380)">+ Add to Order</button></div>
+    </div>
+  </div>
+
+</div><!-- /menu-grid -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active"><div class="nav-icon">🍽</div>Menu</div>
+  <div class="nav-item" onclick="showToast('Tap Place on Table on any dish')"><div class="nav-icon">📷</div>AR View</div>
+  <div class="nav-item" onclick="showToast('0 items in your order')"><div class="nav-icon">🛒</div>Order</div>
+  <div class="nav-item" onclick="showToast('Waiter notified 🔔')"><div class="nav-icon">🔔</div>Waiter</div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let cartItems = 0;
+
+// Map of dish ids → their model-viewer elements
+const mvMap = { momo: null, alfaham: null };
+
+// Initialise once model-viewer script has defined the custom element
+function getMV(id) {
+  if (!mvMap[id]) mvMap[id] = document.getElementById('mv-' + id);
+  return mvMap[id];
+}
+
+function launchAR(id) {
+  const mv = getMV(id);
+  if (!mv) { showToast('AR model not found'); return; }
+
+  try {
+    mv.activateAR();
+  } catch(e) {
+    showToast('AR not supported. Try Android Chrome or iPhone Safari.');
+  }
+}
+
+// Listen to AR events globally
+document.querySelectorAll('model-viewer').forEach(mv => {
+  mv.addEventListener('ar-status', (e) => {
+    if (e.detail.status === 'session-started') {
+      showToast('📍 Move slowly over a flat surface to place');
+    }
+  });
+});
+
+function addToCart(name, price) {
+  cartItems++;
+  const el = document.getElementById('cartCount');
+  el.textContent = cartItems;
+  el.classList.add('show');
+  showToast(`✓ ${name} added — ₹${price.toLocaleString()}`);
+}
+
+function filterCat(btn, cat) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.dish-card');
+  let v = 0;
+  cards.forEach(c => {
+    const show = cat === 'all' || c.dataset.cat === cat;
+    c.style.display = show ? '' : 'none';
+    if (show) v++;
+  });
+  document.getElementById('dishCount').textContent = `${v} dish${v !== 1 ? 'es' : ''}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
