@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR Test</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#111; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; padding:20px; gap:16px; }
+h2 { color:#C9A84C; }
+model-viewer { width:100%; max-width:400px; height:300px; background:#1a1a1a; border-radius:12px; }
+.status { font-size:12px; color:#aaa; text-align:center; padding:10px; background:#1a1a1a; border-radius:8px; width:100%; max-width:400px; }
+#log { font-size:11px; color:#4CAF72; background:#0a1a0a; border-radius:8px; padding:10px; width:100%; max-width:400px; min-height:80px; word-break:break-all; }
+</style>
+</head>
+<body>
+<h2>AR Debug Test</h2>
+
+<model-viewer
+  id="mv"
+  src="momo-optimized.glb"
+  alt="Momo"
+  ar
+  ar-modes="scene-viewer webxr quick-look"
+  camera-controls
+  auto-rotate
+  shadow-intensity="1"
+>
+  <button slot="ar-button" id="arBtn" style="
+    background:#C9A84C; color:#000; border:none;
+    padding:14px 28px; border-radius:8px; font-size:15px;
+    font-weight:600; cursor:pointer; margin:10px;
+  ">
+    📷 Launch AR
+  </button>
+</model-viewer>
+
+<div class="status" id="status">Waiting for model...</div>
+<div id="log">Debug log:</div>
+
+<script>
+  const mv = document.getElementById('mv');
+  const status = document.getElementById('status');
+  const log = document.getElementById('log');
+
+  function addLog(msg) {
+    log.innerHTML += '<br>' + msg;
+  }
+
+  mv.addEventListener('load', () => {
+    status.textContent = '✅ Model loaded. AR should work now.';
+    status.style.color = '#4CAF72';
+    addLog('✅ model loaded');
+    addLog('AR capable: ' + mv.canActivateAR);
+  });
+
+  mv.addEventListener('error', (e) => {
+    status.textContent = '❌ Model failed to load: ' + e.detail;
+    status.style.color = '#CF6679';
+    addLog('❌ error: ' + JSON.stringify(e.detail));
+  });
+
+  mv.addEventListener('ar-status', (e) => {
+    addLog('AR status: ' + e.detail.status);
+  });
+
+  mv.addEventListener('progress', (e) => {
+    addLog('Loading: ' + Math.round(e.detail.totalProgress * 100) + '%');
+  });
+
+  // Check after 3s if still not loaded
+  setTimeout(() => {
+    addLog('canActivateAR = ' + mv.canActivateAR);
+    addLog('loaded = ' + mv.loaded);
+  }, 3000);
+</script>
+</body>
+</html>
